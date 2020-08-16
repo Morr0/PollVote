@@ -13,6 +13,7 @@ namespace PollVoteBackend.Services.Containers
     {
         public Poll Poll;
         public Dictionary<string, int> ChoiceNumbers;
+        public int CurrentVotes { get; set; } = 0;
 
         public PollVotesContainer(Poll poll)
         {

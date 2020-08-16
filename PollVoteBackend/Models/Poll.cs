@@ -30,5 +30,18 @@ namespace PollVoteBackend.Models
         [Required]
         [NotNull]
         public List<string> Choices { get; set; }
+
+        /// <summary>
+        /// How many choices till expiry. i.e. number of choices that will make
+        /// it end the poll.
+        /// </summary>
+        [NotNull]
+        public int ExpiresOnChoices { get; set; } = 5;
+
+        /// <summary>
+        /// When did the poll end (expire).
+        /// </summary>
+        [NotNull]
+        public string EndedOn { get; set; }
     }
 }
