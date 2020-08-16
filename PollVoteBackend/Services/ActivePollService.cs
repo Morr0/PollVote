@@ -1,4 +1,5 @@
 ﻿using PollVoteBackend.Models;
+using PollVoteBackend.Services.Containers;
 using PollVoteBackend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,21 +10,26 @@ namespace PollVoteBackend.Services
 {
     public class ActivePollService : IActivePollService
     {
-        private Dictionary<string, Poll> activePolls;
+        private Dictionary<string, PollVotesContainer> activePolls;
 
         public ActivePollService()
         {
-            activePolls = new Dictionary<string, Poll>();
+            activePolls = new Dictionary<string, PollVotesContainer>();
         }
 
         public void CreatePoll(Poll poll)
         {
-            activePolls.Add(poll.Id, poll);
+            PollVotesContainer pvc = new PollVotesContainer
+            {
+                Poll = poll
+            };
+            activePolls.Add(poll.Id, pvc);
         }
 
         public bool DeletePoll(string id, string deleteToken)
         {
-            if (activePolls[id].DeleteToken == deleteToken)
+            var poll = activePolls[id].Poll;
+            if (poll.DeleteToken == deleteToken)
             {
                 activePolls.Remove(id);
                 return true;
@@ -34,7 +40,7 @@ namespace PollVoteBackend.Services
 
         public Poll GetPoll(string id)
         {
-            return activePolls[id];
+            return activePolls[id].Poll;
         }
 
         public bool HasPoll(string id)
