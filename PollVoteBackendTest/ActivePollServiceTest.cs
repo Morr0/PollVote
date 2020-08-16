@@ -6,6 +6,7 @@ using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 
 namespace PollVoteBackendTest
 {
@@ -70,6 +71,25 @@ namespace PollVoteBackendTest
             _service.CreatePoll(p1);
 
             Assert.AreEqual(p1, _service.GetPoll(p1.Id));
+        }
+
+        [Test]
+        public void VoteTest()
+        {
+            string id = "hello";
+            Poll poll = getPoll(id);
+            string choice = poll.Choices[0];
+            _service.CreatePoll(poll);
+
+            // Add vote
+            Assert.IsTrue(_service.Vote(id, choice));
+
+            // Must have vote 
+            Assert.AreEqual(1, _service.GetVotes(id)[choice]);
+
+            // Voting on non-existing choice
+            choice = "kqhsrg;ljhqergjbew";
+            Assert.IsFalse(_service.Vote(id, choice));
         }
     }
 }

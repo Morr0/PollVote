@@ -14,9 +14,16 @@ namespace PollVoteBackend.Services.Containers
         public Poll Poll;
         public Dictionary<string, int> ChoiceNumbers;
 
-        public PollVotesContainer()
+        public PollVotesContainer(Poll poll)
         {
+            Poll = poll;
             ChoiceNumbers = new Dictionary<string, int>();
+
+            // Add all possible vote choices
+            foreach (string choice in Poll.Choices)
+            {
+                ChoiceNumbers.Add(choice, 0);
+            }
         }
     }
 }
