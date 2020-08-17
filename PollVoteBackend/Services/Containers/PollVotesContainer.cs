@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace PollVoteBackend.Services.Containers
 {
     /// <summary>
-    /// Internal use only. To hold votes for each poll
+    /// Internal use only. To hold votes for each poll. Also
+    /// for inter-service communication.
     /// </summary>
-    internal class PollVotesContainer
+    public class PollVotesContainer
     {
         public Poll Poll;
         public Dictionary<string, int> ChoiceNumbers;

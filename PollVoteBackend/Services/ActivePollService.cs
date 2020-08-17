@@ -100,5 +100,22 @@ namespace PollVoteBackend.Services
         {
             return expiredPolls[id].Poll;
         }
+
+        public IEnumerable<PollVotesContainer> ExtractExpiredPolls()
+        {
+            if (expiredPolls.Count == 0)
+                throw new NoPollException();
+
+            IEnumerable<PollVotesContainer> pvcs = expiredPolls.Values;
+
+            expiredPolls.Clear();
+
+            return pvcs;
+        }
+
+        public bool HasExpiredPolls()
+        {
+            return expiredPolls.Count > 0;
+        }
     }
 }

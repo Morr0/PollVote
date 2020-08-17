@@ -1,4 +1,5 @@
 ﻿using PollVoteBackend.Models;
+using PollVoteBackend.Services.Containers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,7 @@ namespace PollVoteBackend.Services.Interfaces
         Dictionary<string, int> GetVotes(string id);
         bool HasExpiredPoll(string id);
         Poll GetExpiredPoll(string id);
+        IEnumerable<PollVotesContainer> ExtractExpiredPolls();
+        bool HasExpiredPolls();
     }
 }

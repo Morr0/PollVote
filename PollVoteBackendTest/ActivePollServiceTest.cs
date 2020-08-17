@@ -1,12 +1,14 @@
 using NUnit.Framework;
 using PollVoteBackend.Models;
 using PollVoteBackend.Services;
+using PollVoteBackend.Services.Containers;
 using PollVoteBackend.Services.Exceptions;
 using PollVoteBackend.Services.Interfaces;
 using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 
 namespace PollVoteBackendTest
@@ -117,8 +119,33 @@ namespace PollVoteBackendTest
             // Get Expired
             Assert.IsTrue(_service.HasExpiredPoll(id));
             Assert.AreEqual(poll, _service.GetExpiredPoll(id));
+        }
 
-            
+        private void voteNTimes(string id, string choice, int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                if (_service.HasExpiredPoll(id))
+                    break;
+
+                _service.Vote(id, choice);
+            }
+        }
+
+        [Test]
+        public void ExtractExpiredPollsTest()
+        {
+            string id = "99";
+            Poll poll = getPoll(id);
+            string choice = poll.Choices[0];
+
+            _service.CreatePoll(poll);
+            voteNTimes(id, choice, poll.ExpiresOnChoices);
+
+            var pvc = _service.ExtractExpiredPolls();
+
+            Assert.IsFalse(_service.HasExpiredPoll(id));
+            Assert.IsFalse(_service.HasExpiredPolls());
         }
     }
 }
