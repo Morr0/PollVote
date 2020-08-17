@@ -8,7 +8,7 @@ namespace PollVoteBackend.Services.Interfaces
 {
     public interface IArchivedPollService
     {
-        void GetPoll(string id);
+        Poll GetPoll(string id);
         void PutPolls(IEnumerable<Poll> polls);
     }
 }

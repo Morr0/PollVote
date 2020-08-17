@@ -69,8 +69,7 @@ namespace PollVoteBackend.Services
             if (!pvc.ChoiceNumbers.ContainsKey(choice))
                 return false;
 
-            pvc.ChoiceNumbers[choice]++;
-            pvc.CurrentVotes++;
+            vote(pvc, choice);
 
             // When it is about to expire
             if (pvc.CurrentVotes == pvc.Poll.ExpiresOnChoices)
@@ -81,6 +80,16 @@ namespace PollVoteBackend.Services
             }
 
             return true;
+        }
+
+        // A one place for voting
+        private void vote(PollVotesContainer pvc, string choice)
+        {
+            pvc.ChoiceNumbers[choice]++;
+            pvc.CurrentVotes++;
+
+            int i = pvc.ChoiceIndexToChoice[choice];
+            pvc.Poll.ChoicesAnswers[i]++;
         }
 
         public Dictionary<string, int> GetVotes(string id)

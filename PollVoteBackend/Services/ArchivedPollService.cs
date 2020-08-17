@@ -17,7 +17,7 @@ namespace PollVoteBackend.Services
             _context = context;
         }
 
-        public void GetPoll(string id)
+        public Poll GetPoll(string id)
         {
             throw new NotImplementedException();
         }
