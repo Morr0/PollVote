@@ -6,10 +6,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PollVoteBackend.Data;
+using PollVoteBackend.Services;
+using PollVoteBackend.Services.Interfaces;
 
 namespace PollVoteBackend
 {
@@ -26,6 +30,15 @@ namespace PollVoteBackend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            // Postgresql
+            services.AddDbContext<PollsContext>
+                ((options) => options.UseNpgsql(Configuration.GetSection("Connection").Value));
+
+            // Own services
+            services.AddSingleton<IActivePollService, ActivePollService>();
+            services.AddTransient<IArchivedPollService, ArchivedPollService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
