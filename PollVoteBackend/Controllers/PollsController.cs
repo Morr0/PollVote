@@ -35,7 +35,7 @@ namespace PollVoteBackend.Controllers
                 poll = _activePollService.GetPoll(id);
             } else
             {
-                poll = _archivedPollService.GetPoll(id);
+                poll = await _archivedPollService.GetPoll(id);
             }
 
             if (poll == null)
