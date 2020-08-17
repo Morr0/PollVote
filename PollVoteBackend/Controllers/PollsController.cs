@@ -44,5 +44,16 @@ namespace PollVoteBackend.Controllers
             PollReadDTO dto = _mapper.FromPollToReadDTO(poll);
             return Ok(dto);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] PollWriteDTO __poll)
+        {
+            Poll poll = _mapper.Map<Poll>(__poll);
+            _activePollService.CreatePoll(poll);
+
+            PollReadDTO dto = _mapper.FromPollToReadDTO
+                (_activePollService.GetPoll(poll.Id));
+            return Ok(dto);
+        }
     }
 }

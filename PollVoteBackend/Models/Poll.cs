@@ -98,9 +98,7 @@ namespace PollVoteBackend.Models
         public string Question { get; set; }
         public Dictionary<string, int> ChoicesAndAnswers { get; set; }
         public int ExpiresOnChoices { get; set; } = 5;
-        public string EndedOn { get; set; }
-
-        
+        public string EndedOn { get; set; }  
     }
 
     public static class PollExtensions
@@ -109,11 +107,14 @@ namespace PollVoteBackend.Models
         {
             PollReadDTO dto = mapper.Map<PollReadDTO>(poll);
             dto.ChoicesAndAnswers = new Dictionary<string, int>();
+            Console.WriteLine($"Counts: choices: {poll.Choices.Count} answers: {poll.ChoicesAnswers.Capacity}");
 
             int count = poll.Choices.Count;
             for (int i = 0; i < count; i++)
             {
-                dto.ChoicesAndAnswers.Add(poll.Choices[i], poll.ChoicesAnswers[i]);
+                string choice = poll.Choices[i];
+                int answer = poll.ChoicesAnswers[i];
+                dto.ChoicesAndAnswers.Add(choice, answer);
             }
 
             return dto;

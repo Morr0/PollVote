@@ -41,6 +41,9 @@ namespace PollVoteBackend.Services.Containers
 
                 // Add choice to index mapping
                 ChoiceIndexToChoice.Add(choice, i);
+
+                // Put defaults
+                poll.ChoicesAnswers.Add(0);
             }
         }
     }
