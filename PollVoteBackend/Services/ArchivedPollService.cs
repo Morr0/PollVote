@@ -1,4 +1,5 @@
-﻿using PollVoteBackend.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PollVoteBackend.Data;
 using PollVoteBackend.Models;
 using PollVoteBackend.Services.Interfaces;
 using System;
@@ -17,14 +18,16 @@ namespace PollVoteBackend.Services
             _context = context;
         }
 
-        public Poll GetPoll(string id)
+        public async Task<Poll> GetPoll(string id)
         {
-            throw new NotImplementedException();
+            return await _context.Poll.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public void PutPolls(IEnumerable<Poll> polls)
+        public async Task PutPolls(IEnumerable<Poll> polls)
         {
-            throw new NotImplementedException();
+            await _context.AddRangeAsync(polls);
+            await _context.SaveChangesAsync();
         }
     }
 }

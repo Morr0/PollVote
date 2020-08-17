@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PollVoteBackend.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,7 @@ namespace PollVoteBackend.Data
         {
 
         }
+
+        public DbSet<Poll> Poll { get; set; }
     }
 }
