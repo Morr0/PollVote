@@ -21,7 +21,7 @@ namespace PollVoteBackend.Models
         /// <summary>
         /// Cookie only
         /// </summary>
-        public string DeleteToken { get; set; }
+        public string DeleteToken { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// Question of a poll

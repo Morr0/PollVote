@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PollVoteBackend.Controllers.Queries;
 using PollVoteBackend.Models;
@@ -12,6 +13,9 @@ namespace PollVoteBackend.Controllers
     [ApiController]
     public class PollsController : ControllerBase
     {
+        public static string DELETE_TOKEN_COOKIE_NAME = "deleteToken";
+
+
         private IActivePollService _activePollService;
         private IArchivedPollService _archivedPollService;
         private IMapper _mapper;
@@ -41,7 +45,7 @@ namespace PollVoteBackend.Controllers
             {
                 return _activePollService.GetPoll(id);
             }
-            else
+            else 
             {
                 return await _archivedPollService.GetPoll(id);
             }
@@ -52,6 +56,13 @@ namespace PollVoteBackend.Controllers
         {
             Poll poll = _mapper.Map<Poll>(__poll);
             _activePollService.CreatePoll(poll);
+
+            // Attach delete token to cookie
+            CookieOptions opts = new CookieOptions
+            {
+                MaxAge = TimeSpan.FromHours(1)
+            };
+            Response.Cookies.Append(DELETE_TOKEN_COOKIE_NAME, poll.DeleteToken, opts);
 
             PollReadDTO dto = _mapper.FromPollToReadDTO
                 (_activePollService.GetPoll(poll.Id));
@@ -77,6 +88,28 @@ namespace PollVoteBackend.Controllers
 
             PollReadDTO dto = _mapper.FromPollToReadDTO(poll);
             return Ok(dto);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteActiveQueue([FromRoute] string id)
+        {
+            if (!_activePollService.HasPoll(id))
+                return NotFound();
+            
+            // Get delete token from cookie
+            try
+            {
+                Request.Cookies.TryGetValue(DELETE_TOKEN_COOKIE_NAME, out string deleteToken);
+
+                if (!_activePollService.DeletePoll(id, deleteToken))
+                    return StatusCode(403);
+
+                return Ok();
+            } catch (ArgumentNullException)
+            {
+                return BadRequest();
+            }
+
         }
     }
 }
