@@ -1,4 +1,5 @@
 ﻿using PollVoteBackend.Models;
+using PollVoteBackend.Services.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,8 @@ namespace PollVoteBackend.Services.Interfaces
     {
         Task<Poll> GetPoll(string id);
         Task PutPolls(IEnumerable<Poll> polls);
+
+        // Event handler when a poll has expired
+        void OnPollExpiry(object sender, PollExpiryEventArgs args);
     }
 }

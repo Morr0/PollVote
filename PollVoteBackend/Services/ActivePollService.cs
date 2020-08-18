@@ -1,11 +1,10 @@
 ﻿using PollVoteBackend.Models;
 using PollVoteBackend.Services.Containers;
+using PollVoteBackend.Services.Events;
 using PollVoteBackend.Services.Exceptions;
 using PollVoteBackend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PollVoteBackend.Services
 {
@@ -19,6 +18,8 @@ namespace PollVoteBackend.Services
             activePolls = new Dictionary<string, PollVotesContainer>();
             expiredPolls = new Dictionary<string, PollVotesContainer>();
         }
+
+        public event EventHandler<PollExpiryEventArgs> PollExpirySystem;
 
         public void CreatePoll(Poll poll)
         {
@@ -48,11 +49,6 @@ namespace PollVoteBackend.Services
             return activePolls.ContainsKey(id);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="choice"></param>
         /// <returns>False when the choice does not exist</returns>
         public bool Vote(string id, string choice)
         {
@@ -70,14 +66,7 @@ namespace PollVoteBackend.Services
                 return false;
 
             vote(pvc, choice);
-
-            // When it is about to expire
-            if (pvc.CurrentVotes == pvc.Poll.ExpiresOnChoices)
-            {
-                // Move from active to expired
-                expiredPolls.Add(pvc.Poll.Id, pvc);
-                activePolls.Remove(pvc.Poll.Id);
-            }
+            checkForExpiryThenPublishIfSo(pvc);
 
             return true;
         }
@@ -90,6 +79,26 @@ namespace PollVoteBackend.Services
 
             int i = pvc.ChoiceIndexToChoice[choice];
             pvc.Poll.ChoicesAnswers[i]++;
+        }
+
+        private void checkForExpiryThenPublishIfSo(PollVotesContainer pvc)
+        {
+            // When it is about to expire
+            if (pvc.CurrentVotes == pvc.Poll.ExpiresOnChoices)
+            {
+                // Move from active to expired
+                expiredPolls.Add(pvc.Poll.Id, pvc);
+                activePolls.Remove(pvc.Poll.Id);
+            }
+
+            // Notify
+            if (PollExpirySystem != null)
+            {
+                PollExpirySystem(this, new PollExpiryEventArgs
+                {
+                    PVC = pvc
+                });
+            }
         }
 
         public Dictionary<string, int> GetVotes(string id)
