@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace PollVoteBackendTest
 {
@@ -95,32 +96,6 @@ namespace PollVoteBackendTest
             Assert.IsFalse(_service.Vote(id, choice));
         }
 
-        [Test]
-        public void VoteTillExpiryTest()
-        {
-            string id = "1";
-            Poll poll = getPoll(id);
-            string choice = poll.Choices[0];
-            // Set to expire on the 3rd choice
-            poll.ExpiresOnChoices = 3;
-
-            _service.CreatePoll(poll);
-            _service.Vote(id, choice);
-            _service.Vote(id, choice);
-            _service.Vote(id, choice);
-
-            // Since is expired
-            Assert.IsFalse(_service.HasActivePoll(id));
-
-            // Must throw
-            Assert.Catch<PollHasExpiredException>
-                (() => _service.Vote(id, choice));
-
-            // Get Expired
-            Assert.IsTrue(_service.HasExpiredPoll(id));
-            Assert.AreEqual(poll, _service.GetExpiredPoll(id));
-        }
-
         private void voteNTimes(string id, string choice, int n)
         {
             for (int i = 0; i < n; i++)
@@ -133,8 +108,12 @@ namespace PollVoteBackendTest
         }
 
         [Test]
-        public void ExtractExpiredPollsTest()
+        public async Task ArchivedPollsTest()
         {
+            // Setup
+            MockArchivedPollService archivedPollsService = new MockArchivedPollService();
+            (_service as ActivePollService).PollExpirySystem += archivedPollsService.OnPollExpiry;
+
             string id = "99";
             Poll poll = getPoll(id);
             string choice = poll.Choices[0];
@@ -142,10 +121,11 @@ namespace PollVoteBackendTest
             _service.CreatePoll(poll);
             voteNTimes(id, choice, poll.ExpiresOnChoices);
 
-            var pvc = _service.ExtractExpiredPolls();
+            Poll pollFromArchive = await archivedPollsService.GetPoll(id);
 
-            Assert.IsFalse(_service.HasExpiredPoll(id));
-            Assert.IsFalse(_service.HasExpiredPolls());
+            Assert.AreEqual(poll, pollFromArchive);
+            Assert.IsFalse(_service.HasActivePoll(id));
+
         }
     }
 }
