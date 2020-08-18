@@ -18,6 +18,7 @@ namespace PollVoteBackend.Services
         }
 
         public event EventHandler<PollExpiryEventArgs> PollExpirySystem;
+        //public delegate void PollExpirySystem(PollVotesContainer pvc);  
 
         public void CreatePoll(Poll poll)
         {
@@ -83,7 +84,7 @@ namespace PollVoteBackend.Services
                 // Notify
                 if (PollExpirySystem != null)
                 {
-                    PollExpirySystem(this, new PollExpiryEventArgs
+                    PollExpirySystem.Invoke(this, new PollExpiryEventArgs
                     {
                         PVC = pvc
                     });

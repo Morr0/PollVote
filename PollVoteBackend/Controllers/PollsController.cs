@@ -73,7 +73,7 @@ namespace PollVoteBackend.Controllers
             // Vote now
             bool result = _activePollService.Vote(id, query.Choice);
             if (!result)
-                return Conflict();
+                return NotFound(new { Reason = "Choice does not exist" });
 
             PollReadDTO dto = _mapper.FromPollToReadDTO(poll);
             return Ok(dto);

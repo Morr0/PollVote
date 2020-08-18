@@ -1,19 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PollVoteBackend.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PollVoteBackend.Data
 {
     public class PollsContext : DbContext
     {
-        public PollsContext(DbContextOptions<PollsContext> options)
+        private IConfiguration _configuration;
+        public PollsContext(DbContextOptions<PollsContext> options, IConfiguration configuration)
             : base(options)
         {
-
+            _configuration = configuration;
         }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            => optionsBuilder.UseNpgsql(_configuration.GetSection("Connection").Value);
 
         public DbSet<Poll> Poll { get; set; }
     }

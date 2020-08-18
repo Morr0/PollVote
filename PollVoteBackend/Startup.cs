@@ -33,9 +33,7 @@ namespace PollVoteBackend
             services.AddControllers();
 
             // Postgresql
-            services.AddDbContext<PollsContext>
-                ((options) => options.UseNpgsql(Configuration.GetSection("Connection").Value));
-
+            services.AddDbContext<PollsContext>();
             // Auto mapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
