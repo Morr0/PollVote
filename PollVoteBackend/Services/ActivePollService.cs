@@ -10,13 +10,11 @@ namespace PollVoteBackend.Services
 {
     public class ActivePollService : IActivePollService
     {
-        private Dictionary<string, PollVotesContainer> activePolls;
-        private Dictionary<string, PollVotesContainer> expiredPolls;
+        private Dictionary<string, PollVotesContainer> _activePolls;
 
         public ActivePollService()
         {
-            activePolls = new Dictionary<string, PollVotesContainer>();
-            expiredPolls = new Dictionary<string, PollVotesContainer>();
+            _activePolls = new Dictionary<string, PollVotesContainer>();
         }
 
         public event EventHandler<PollExpiryEventArgs> PollExpirySystem;
@@ -24,15 +22,15 @@ namespace PollVoteBackend.Services
         public void CreatePoll(Poll poll)
         {
             PollVotesContainer pvc = new PollVotesContainer(poll);
-            activePolls.Add(poll.Id, pvc);
+            _activePolls.Add(poll.Id, pvc);
         }
 
         public bool DeletePoll(string id, string deleteToken)
         {
-            var poll = activePolls[id].Poll;
+            var poll = _activePolls[id].Poll;
             if (poll.DeleteToken == deleteToken)
             {
-                activePolls.Remove(id);
+                _activePolls.Remove(id);
                 return true;
             }
 
@@ -41,27 +39,21 @@ namespace PollVoteBackend.Services
 
         public Poll GetPoll(string id)
         {
-            return activePolls[id].Poll;
+            return _activePolls[id].Poll;
         }
 
-        public bool HasActivePoll(string id)
+        public bool HasPoll(string id)
         {
-            return activePolls.ContainsKey(id);
+            return _activePolls.ContainsKey(id);
         }
 
         /// <returns>False when the choice does not exist</returns>
         public bool Vote(string id, string choice)
         {
-            if (!activePolls.ContainsKey(id))
-            {
-                // Check that it is not expired
-                if (expiredPolls.ContainsKey(id))
-                    throw new PollHasExpiredException();
-
+            if (!_activePolls.ContainsKey(id))
                 throw new NoPollException();
-            }
 
-            PollVotesContainer pvc = activePolls[id];
+            PollVotesContainer pvc = _activePolls[id];
             if (!pvc.ChoiceNumbers.ContainsKey(choice))
                 return false;
 
@@ -86,54 +78,25 @@ namespace PollVoteBackend.Services
             // When it is about to expire
             if (pvc.CurrentVotes == pvc.Poll.ExpiresOnChoices)
             {
-                // Move from active to expired
-                expiredPolls.Add(pvc.Poll.Id, pvc);
-                activePolls.Remove(pvc.Poll.Id);
-            }
+                _activePolls.Remove(pvc.Poll.Id);
 
-            // Notify
-            if (PollExpirySystem != null)
-            {
-                PollExpirySystem(this, new PollExpiryEventArgs
+                // Notify
+                if (PollExpirySystem != null)
                 {
-                    PVC = pvc
-                });
+                    PollExpirySystem(this, new PollExpiryEventArgs
+                    {
+                        PVC = pvc
+                    });
+                }
             }
         }
 
         public Dictionary<string, int> GetVotes(string id)
         {
-            if (!activePolls.ContainsKey(id))
+            if (!_activePolls.ContainsKey(id))
                 throw new NoPollException();
 
-            return activePolls[id].ChoiceNumbers;
+            return _activePolls[id].ChoiceNumbers;
          }
-
-        public bool HasExpiredPoll(string id)
-        {
-            return expiredPolls.ContainsKey(id);
-        }
-
-        public Poll GetExpiredPoll(string id)
-        {
-            return expiredPolls[id].Poll;
-        }
-
-        public IEnumerable<PollVotesContainer> ExtractExpiredPolls()
-        {
-            if (expiredPolls.Count == 0)
-                throw new NoPollException();
-
-            IEnumerable<PollVotesContainer> pvcs = expiredPolls.Values;
-
-            expiredPolls.Clear();
-
-            return pvcs;
-        }
-
-        public bool HasExpiredPolls()
-        {
-            return expiredPolls.Count > 0;
-        }
     }
 }

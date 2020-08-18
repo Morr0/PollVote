@@ -1,15 +1,8 @@
 using NUnit.Framework;
 using PollVoteBackend.Models;
 using PollVoteBackend.Services;
-using PollVoteBackend.Services.Containers;
-using PollVoteBackend.Services.Exceptions;
 using PollVoteBackend.Services.Interfaces;
-using System;
-using System.Buffers.Text;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace PollVoteBackendTest
@@ -31,7 +24,7 @@ namespace PollVoteBackendTest
 
             _service.CreatePoll(poll);
 
-            Assert.IsTrue(_service.HasActivePoll(poll.Id));
+            Assert.IsTrue(_service.HasPoll(poll.Id));
         }
 
         private Poll getPoll(string id = "5")
@@ -100,9 +93,6 @@ namespace PollVoteBackendTest
         {
             for (int i = 0; i < n; i++)
             {
-                if (_service.HasExpiredPoll(id))
-                    break;
-
                 _service.Vote(id, choice);
             }
         }
@@ -124,7 +114,7 @@ namespace PollVoteBackendTest
             Poll pollFromArchive = await archivedPollsService.GetPoll(id);
 
             Assert.AreEqual(poll, pollFromArchive);
-            Assert.IsFalse(_service.HasActivePoll(id));
+            Assert.IsFalse(_service.HasPoll(id));
 
         }
     }

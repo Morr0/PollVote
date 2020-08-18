@@ -30,7 +30,7 @@ namespace PollVoteBackend.Controllers
         public async Task<IActionResult> Get([FromRoute] string id)
         {
             Poll poll = null;
-            if (_activePollService.HasActivePoll(id))
+            if (_activePollService.HasPoll(id))
             {
                 poll = _activePollService.GetPoll(id);
             } else

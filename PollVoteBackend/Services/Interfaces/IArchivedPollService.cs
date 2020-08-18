@@ -10,7 +10,6 @@ namespace PollVoteBackend.Services.Interfaces
     public interface IArchivedPollService
     {
         Task<Poll> GetPoll(string id);
-        Task PutPolls(IEnumerable<Poll> polls);
 
         // Event handler when a poll has expired
         void OnPollExpiry(object sender, PollExpiryEventArgs args);

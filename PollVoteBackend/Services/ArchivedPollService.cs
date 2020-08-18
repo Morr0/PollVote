@@ -3,9 +3,6 @@ using PollVoteBackend.Data;
 using PollVoteBackend.Models;
 using PollVoteBackend.Services.Events;
 using PollVoteBackend.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PollVoteBackend.Services
@@ -28,12 +25,6 @@ namespace PollVoteBackend.Services
         {
             return await _context.Poll.AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
-        }
-
-        public async Task PutPolls(IEnumerable<Poll> polls)
-        {
-            await _context.AddRangeAsync(polls);
-            await _context.SaveChangesAsync();
         }
 
         public async void OnPollExpiry(object sender, PollExpiryEventArgs args)
