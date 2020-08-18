@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PollVoteBackend.Controllers.Queries;
 using PollVoteBackend.Models;
 using PollVoteBackend.Services.Interfaces;
 
@@ -29,20 +27,24 @@ namespace PollVoteBackend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get([FromRoute] string id)
         {
-            Poll poll = null;
-            if (_activePollService.HasPoll(id))
-            {
-                poll = _activePollService.GetPoll(id);
-            } else
-            {
-                poll = await _archivedPollService.GetPoll(id);
-            }
-
+            Poll poll = await getPoll(id);
             if (poll == null)
                 return NotFound();
 
             PollReadDTO dto = _mapper.FromPollToReadDTO(poll);
             return Ok(dto);
+        }
+
+        private async Task<Poll> getPoll(string id)
+        {
+            if (_activePollService.HasPoll(id))
+            {
+                return _activePollService.GetPoll(id);
+            }
+            else
+            {
+                return await _archivedPollService.GetPoll(id);
+            }
         }
 
         [HttpPost]
@@ -53,6 +55,27 @@ namespace PollVoteBackend.Controllers
 
             PollReadDTO dto = _mapper.FromPollToReadDTO
                 (_activePollService.GetPoll(poll.Id));
+            return Ok(dto);
+        }
+
+        [HttpPut("vote/{id}")]
+        public async Task<IActionResult> Vote([FromRoute] string id, [FromQuery] VotingQuery query)
+        {
+            if (_activePollService.HasPoll(id))
+            Console.WriteLine("Has id");
+            Poll poll = await getPoll(id);
+            if (poll == null)
+                return NotFound();
+
+            if (!string.IsNullOrEmpty(poll.EndedOn))
+                return BadRequest();
+
+            // Vote now
+            bool result = _activePollService.Vote(id, query.Choice);
+            if (!result)
+                return Conflict();
+
+            PollReadDTO dto = _mapper.FromPollToReadDTO(poll);
             return Ok(dto);
         }
     }

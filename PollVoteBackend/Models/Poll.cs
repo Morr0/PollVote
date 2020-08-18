@@ -95,6 +95,7 @@ namespace PollVoteBackend.Models
 
     public class PollReadDTO
     {
+        public string Id { get; set; }
         public string Question { get; set; }
         public Dictionary<string, int> ChoicesAndAnswers { get; set; }
         public int ExpiresOnChoices { get; set; } = 5;
